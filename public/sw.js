@@ -1,9 +1,9 @@
 const CACHE_NAME = 'nexustube-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
-  '/favicon.svg'
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './favicon.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -40,14 +40,14 @@ self.addEventListener('fetch', (event) => {
       }
       return fetch(event.request).then((networkResponse) => {
         return caches.open(CACHE_NAME).then((cache) => {
-          if (event.request.method === 'GET' && url.protocol === 'http:') {
+          if (event.request.method === 'GET' && (url.protocol === 'http:' || url.protocol === 'https:')) {
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
         });
       }).catch(() => {
         if (event.request.mode === 'navigate') {
-          return caches.match('/');
+          return caches.match('./') || caches.match('./index.html');
         }
       });
     })
