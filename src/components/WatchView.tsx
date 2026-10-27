@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { YouTubeVideo, SavedVideoMeta } from '../types';
-import { ArrowLeft, Heart, Clock, Tag, Save, ExternalLink, Shield, Loader2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Heart, Clock, Tag, Save, ExternalLink, Shield, Play } from 'lucide-react';
 import { fetchSponsorSegments, type SponsorSegment } from '../services/sponsorblock';
-import { fetchPipedStream } from '../services/playerService';
 
 interface WatchViewProps {
   video: YouTubeVideo;
@@ -34,40 +33,20 @@ export const WatchView: React.FC<WatchViewProps> = ({
   const [savedStatus, setSavedStatus] = useState(false);
   const [sponsorSegments, setSponsorSegments] = useState<SponsorSegment[]>([]);
   const [loadingSponsors, setLoadingSponsors] = useState(true);
-
-  // Direct video stream states
-  const [streamUrl, setStreamUrl] = useState<string | null>(null);
-  const [loadingStream, setLoadingStream] = useState<boolean>(true);
-  const [playerMode, setPlayerMode] = useState<'direct' | 'pipedEmbed' | 'ytEmbed'>('direct');
+  const [embedFailed, setEmbedFailed] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    async function loadData() {
+    async function loadSponsors() {
       setLoadingSponsors(true);
-      setLoadingStream(true);
-      setStreamUrl(null);
-      setPlayerMode('direct');
-
-      const [segments, streamRes] = await Promise.all([
-        fetchSponsorSegments(video.id),
-        fetchPipedStream(video.id)
-      ]);
-
+      const segments = await fetchSponsorSegments(video.id);
       if (isMounted) {
         setSponsorSegments(segments);
         setLoadingSponsors(false);
-
-        if (streamRes.videoUrl) {
-          setStreamUrl(streamRes.videoUrl);
-          setPlayerMode('direct');
-        } else {
-          // Fall back to Piped Embed if direct stream fails
-          setPlayerMode('pipedEmbed');
-        }
-        setLoadingStream(false);
       }
     }
-    loadData();
+    loadSponsors();
+    setEmbedFailed(false);
     return () => {
       isMounted = false;
     };
@@ -179,57 +158,48 @@ export const WatchView: React.FC<WatchViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center">
-            {loadingStream ? (
-              <div className="absolute inset-0 bg-gray-900 flex flex-col items-center justify-center p-6 text-center space-y-3">
-                <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-                <p className="text-xs text-gray-300 font-medium">Extracting direct stream via privacy proxy...</p>
+            {embedFailed ? (
+              <div className="absolute inset-0 bg-gray-900 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                  <Play className="w-8 h-8 fill-current ml-1" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-base">Embedding Restricted by YouTube Creator</h3>
+                  <p className="text-xs text-gray-400 max-w-md mt-1">
+                    This video does not allow playback inside embedded players or requires direct access. You can watch it directly on YouTube.
+                  </p>
+                </div>
+                <a
+                  href={`https://www.youtube.com/watch?v=${video.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 rounded-xl text-white text-xs font-semibold shadow-lg flex items-center gap-2"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Open Video on YouTube</span>
+                </a>
               </div>
-            ) : playerMode === 'direct' && streamUrl ? (
-              <video
-                src={streamUrl}
-                controls
-                autoPlay
-                className="w-full h-full object-contain bg-black"
-                onError={() => setPlayerMode('pipedEmbed')}
-              />
-            ) : playerMode === 'pipedEmbed' ? (
-              <iframe
-                src={`https://piped.video/embed/${video.id}?autoplay=1`}
-                title={video.title}
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
             ) : (
-              <iframe
-                src={`https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&enablejsapi=1`}
-                title={video.title}
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+              <>
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
+                  title={video.title}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  onError={() => setEmbedFailed(true)}
+                />
+                <div className="absolute top-3 right-3">
+                  <button
+                    onClick={() => setEmbedFailed(true)}
+                    className="bg-black/70 hover:bg-black text-white text-[10px] px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10 transition-colors"
+                  >
+                    Having trouble? Open Direct
+                  </button>
+                </div>
+              </>
             )}
-
-            <div className="absolute top-3 left-3 flex items-center gap-2">
-              <span className="bg-black/70 backdrop-blur-md text-white text-[10px] px-2.5 py-1 rounded-lg border border-white/10 font-mono">
-                {playerMode === 'direct' ? 'NexusTube Direct Stream' : 'Privacy Piped Embed'}
-              </span>
-            </div>
-
-            <div className="absolute top-3 right-3 flex items-center gap-2">
-              <button
-                onClick={() => {
-                  if (playerMode === 'direct') setPlayerMode('pipedEmbed');
-                  else if (playerMode === 'pipedEmbed') setPlayerMode('ytEmbed');
-                  else setPlayerMode('direct');
-                }}
-                className="bg-black/70 hover:bg-black text-white text-[10px] px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10 transition-colors flex items-center gap-1"
-                title="Switch video player engine"
-              >
-                <RefreshCw className="w-3 h-3" />
-                <span>Switch Engine</span>
-              </button>
-            </div>
           </div>
 
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4 shadow-lg">

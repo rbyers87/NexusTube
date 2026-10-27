@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { AppSettings } from '../types';
 import { Settings, Key, Palette, Layout, Check, Sun, Moon, Monitor } from 'lucide-react';
 
@@ -20,6 +20,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [theme, setTheme] = useState<'dark' | 'light' | 'system'>(settings.theme || 'dark');
   const [savedStatus, setSavedStatus] = useState(false);
 
+  useEffect(() => {
+    setTheme(settings.theme);
+  }, [settings.theme]);
+
   const accentColors = [
     { label: 'Purple', value: '#c084fc' },
     { label: 'Blue', value: '#3b82f6' },
@@ -30,6 +34,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   const handleThemeChange = (newTheme: 'dark' | 'light' | 'system') => {
     setTheme(newTheme);
+    const root = document.documentElement;
+    if (newTheme === 'dark') {
+      root.classList.add('dark');
+    } else if (newTheme === 'light') {
+      root.classList.remove('dark');
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.classList.toggle('dark', prefersDark);
+    }
     const updated: AppSettings = {
       ...settings,
       theme: newTheme,
