@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { AppSettings } from '../types';
-import { Settings, Key, Palette, Layout, Check } from 'lucide-react';
+import { Settings, Key, Palette, Layout, Check, Sun, Moon, Monitor } from 'lucide-react';
 
 interface SettingsViewProps {
   settings: AppSettings;
@@ -17,6 +17,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [selectedAccent, setSelectedAccent] = useState(settings.accentColor);
   const [density, setDensity] = useState(settings.density);
   const [gridColumns, setGridColumns] = useState(settings.gridColumns);
+  const [theme, setTheme] = useState<'dark' | 'light' | 'system'>(settings.theme || 'dark');
   const [savedStatus, setSavedStatus] = useState(false);
 
   const accentColors = [
@@ -35,6 +36,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       accentColor: selectedAccent,
       density,
       gridColumns: Number(gridColumns),
+      theme,
     };
     onSaveSettings(updated);
     setSavedStatus(true);
@@ -49,7 +51,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <span>Player & Application Settings</span>
         </h1>
         <p className="text-sm text-gray-400 mt-1">
-          Customize your NexusTube interface, grid layout density, and YouTube Data API key.
+          Customize your NexusTube interface, theme mode, grid layout density, and YouTube Data API key.
         </p>
       </div>
 
@@ -70,6 +72,38 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               placeholder="AIzaSy..."
               className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm font-mono text-gray-200 focus:outline-none focus:border-purple-500"
             />
+          </div>
+        </div>
+
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4 shadow-lg">
+          <div className="flex items-center gap-2 text-gray-100 font-bold">
+            <Moon className="w-5 h-5 text-purple-400" />
+            <h2>Theme Mode</h2>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { id: 'dark', label: 'Dark Mode', icon: Moon },
+              { id: 'light', label: 'Light Mode', icon: Sun },
+              { id: 'system', label: 'System Default', icon: Monitor },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isSelected = theme === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setTheme(item.id as any)}
+                  className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all ${
+                    isSelected
+                      ? 'bg-purple-500/10 border-purple-500/50 text-white shadow-lg'
+                      : 'bg-gray-950 border-gray-800 text-gray-400 hover:text-gray-200 hover:border-gray-700'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 mb-2 ${isSelected ? 'text-purple-400' : 'text-gray-400'}`} />
+                  <span className="text-xs font-semibold">{item.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 

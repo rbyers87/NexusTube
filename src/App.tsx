@@ -65,6 +65,34 @@ export function App() {
     }
   }, []);
 
+  // Theme management effect
+  useEffect(() => {
+    const applyTheme = (themeMode: 'dark' | 'light' | 'system') => {
+      const root = document.documentElement;
+      if (themeMode === 'dark') {
+        root.classList.add('dark');
+      } else if (themeMode === 'light') {
+        root.classList.remove('dark');
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
+      }
+    };
+
+    applyTheme(settings.theme);
+
+    if (settings.theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => applyTheme('system');
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, [settings.theme]);
+
   const handleSearchSubmit = async (query: string) => {
     const res = await searchYouTubeVideos(query, settings.youtubeApiKey);
     setVideos(res.videos);
