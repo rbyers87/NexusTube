@@ -164,20 +164,20 @@ export const WatchView: React.FC<WatchViewProps> = ({
                   <Play className="w-8 h-8 fill-current ml-1" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-base">Embedding Restricted by YouTube Creator</h3>
+                  <h3 className="font-bold text-white text-base">Watch Directly on YouTube</h3>
                   <p className="text-xs text-gray-400 max-w-md mt-1">
-                    This video does not allow playback inside embedded players or requires direct access. You can watch it directly on YouTube.
+                    Some creators restrict embedded playback or browser network policies block third-party frames. Click below to open and watch seamlessly on YouTube.
                   </p>
                 </div>
                 <a
                   href={`https://www.youtube.com/watch?v=${video.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-5 py-2.5 rounded-xl text-white text-xs font-semibold shadow-lg flex items-center gap-2"
+                  className="px-6 py-3 rounded-xl text-white text-xs font-semibold shadow-lg flex items-center gap-2 transition-transform hover:scale-105"
                   style={{ backgroundColor: accentColor }}
                 >
                   <ExternalLink className="w-4 h-4" />
-                  <span>Open Video on YouTube</span>
+                  <span>Open Video in New Tab</span>
                 </a>
               </div>
             ) : (
@@ -190,12 +190,12 @@ export const WatchView: React.FC<WatchViewProps> = ({
                   allowFullScreen
                   onError={() => setEmbedFailed(true)}
                 />
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 right-3 flex items-center gap-2">
                   <button
                     onClick={() => setEmbedFailed(true)}
-                    className="bg-black/70 hover:bg-black text-white text-[10px] px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10 transition-colors"
+                    className="bg-black/70 hover:bg-black text-white text-[10px] px-2.5 py-1.5 rounded-lg backdrop-blur-sm border border-white/10 transition-colors shadow-lg"
                   >
-                    Having trouble? Open Direct
+                    Switch to Direct Play
                   </button>
                 </div>
               </>
