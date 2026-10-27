@@ -11,6 +11,7 @@ import { DevToolsView } from './components/DevToolsView';
 import { storage, DEFAULT_SETTINGS } from './services/storage';
 import { searchYouTubeVideos, MOCK_VIDEOS } from './services/youtube';
 import type { YouTubeVideo, SavedVideoMeta, Collection, Userscript, PluginItem, AppSettings } from './types';
+import { Home, Library, History, Code2, Settings } from 'lucide-react';
 
 export function App() {
   const [currentView, setCurrentView] = useState<string>('discover');
@@ -172,21 +173,31 @@ export function App() {
     }
   };
 
+  const mobileNavItems = [
+    { id: 'discover', label: 'Discover', icon: Home },
+    { id: 'library', label: 'Library', icon: Library },
+    { id: 'history', label: 'History', icon: History },
+    { id: 'scripts', label: 'Scripts', icon: Code2 },
+    { id: 'settings', label: 'Settings', icon: Settings },
+  ];
+
   return (
-    <div className="flex min-h-screen bg-gray-950 text-gray-100">
-      <Sidebar
-        currentView={currentView}
-        setCurrentView={(v) => {
-          setSelectedVideo(null);
-          setCurrentView(v);
-        }}
-        collapsed={sidebarCollapsed}
-        setCollapsed={async (c) => {
-          setSidebarCollapsed(c);
-          await handleSaveSettings({ ...settings, sidebarCollapsed: c });
-        }}
-        accentColor={settings.accentColor}
-      />
+    <div className="flex min-h-screen bg-gray-950 text-gray-100 pb-20 md:pb-0">
+      <div className="hidden md:flex">
+        <Sidebar
+          currentView={currentView}
+          setCurrentView={(v) => {
+            setSelectedVideo(null);
+            setCurrentView(v);
+          }}
+          collapsed={sidebarCollapsed}
+          setCollapsed={async (c) => {
+            setSidebarCollapsed(c);
+            await handleSaveSettings({ ...settings, sidebarCollapsed: c });
+          }}
+          accentColor={settings.accentColor}
+        />
+      </div>
 
       <div className="flex-1 flex flex-col min-w-0">
         <Header
@@ -199,7 +210,7 @@ export function App() {
           accentColor={settings.accentColor}
         />
 
-        <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto pb-24 md:pb-8">
           {selectedVideo ? (
             <WatchView
               video={selectedVideo}
@@ -290,6 +301,36 @@ export function App() {
           )}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <nav aria-label="Mobile Navigation" className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-800 z-40 px-2 py-2 flex items-center justify-around shadow-2xl">
+        {mobileNavItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = currentView === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => {
+                setSelectedVideo(null);
+                setCurrentView(item.id);
+              }}
+              className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-colors ${
+                isActive ? 'text-white' : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <div
+                className={`p-1.5 rounded-xl transition-all ${
+                  isActive ? 'shadow-md' : ''
+                }`}
+                style={isActive ? { backgroundColor: settings.accentColor } : {}}
+              >
+                <Icon className="w-5 h-5" />
+              </div>
+              <span className="text-[10px] font-medium mt-1">{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }
