@@ -13,6 +13,7 @@ interface WatchViewProps {
   relatedVideos: YouTubeVideo[];
   onSelectVideo: (video: YouTubeVideo) => void;
   accentColor: string;
+  sponsorBlockEnabled: boolean;
 }
 
 export const WatchView: React.FC<WatchViewProps> = ({
@@ -25,6 +26,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
   relatedVideos,
   onSelectVideo,
   accentColor,
+  sponsorBlockEnabled,
 }) => {
   const [notes, setNotes] = useState(savedMeta?.notes || '');
   const [tags, setTags] = useState<string[]>(savedMeta?.tags || []);
@@ -38,6 +40,11 @@ export const WatchView: React.FC<WatchViewProps> = ({
   useEffect(() => {
     let isMounted = true;
     async function loadSponsors() {
+      if (!sponsorBlockEnabled) {
+        setSponsorSegments([]);
+        setLoadingSponsors(false);
+        return;
+      }
       setLoadingSponsors(true);
       const segments = await fetchSponsorSegments(video.id);
       if (isMounted) {
@@ -50,7 +57,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [video.id]);
+  }, [video.id, sponsorBlockEnabled]);
 
   const handleSaveNotes = () => {
     onSaveMeta({
@@ -205,21 +212,23 @@ export const WatchView: React.FC<WatchViewProps> = ({
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4 shadow-lg">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-snug">{video.title}</h1>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border ${
-                  loadingSponsors
-                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
-                    : sponsorSegments.length > 0
-                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
-                }`}>
-                  <Shield className="w-3.5 h-3.5" />
-                  {loadingSponsors ? 'Checking SponsorBlock...' : sponsorSegments.length > 0 ? `SponsorBlock: ${sponsorSegments.length} segments` : 'No sponsors found'}
-                </span>
-              </div>
+              {sponsorBlockEnabled && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border ${
+                    loadingSponsors
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                      : sponsorSegments.length > 0
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                  }`}>
+                    <Shield className="w-3.5 h-3.5" />
+                    {loadingSponsors ? 'Checking SponsorBlock...' : sponsorSegments.length > 0 ? `SponsorBlock: ${sponsorSegments.length} segments` : 'No sponsors found'}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {sponsorSegments.length > 0 && (
+            {sponsorBlockEnabled && sponsorSegments.length > 0 && (
               <div className="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl p-3 flex flex-wrap items-center gap-2 text-xs">
                 <span className="text-gray-600 dark:text-gray-400 font-medium">Skipping Segments:</span>
                 {sponsorSegments.map((seg, idx) => (

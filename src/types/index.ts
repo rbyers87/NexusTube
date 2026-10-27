@@ -80,4 +80,5 @@ export interface AppSettings {
   youtubeApiKey: string;
   autoplay: boolean;
   featuredContentEnabled: boolean;
+  sponsorBlockEnabled: boolean;
 }

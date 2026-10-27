@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   youtubeApiKey: '',
   autoplay: true,
   featuredContentEnabled: true,
+  sponsorBlockEnabled: true,
 };
 
 export const DEFAULT_PLUGINS: PluginItem[] = [

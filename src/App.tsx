@@ -4,14 +4,12 @@ import { Header } from './components/Header';
 import { VideoGrid } from './components/VideoGrid';
 import { WatchView } from './components/WatchView';
 import { LibraryView } from './components/LibraryView';
-import { ScriptsView } from './components/ScriptsView';
-import { ExtensionsView } from './components/ExtensionsView';
 import { SettingsView } from './components/SettingsView';
 import { DevToolsView } from './components/DevToolsView';
 import { storage, DEFAULT_SETTINGS } from './services/storage';
 import { searchYouTubeVideos, MOCK_VIDEOS } from './services/youtube';
 import type { YouTubeVideo, SavedVideoMeta, Collection, Userscript, PluginItem, AppSettings } from './types';
-import { Home, Library, History, Code2, Settings } from 'lucide-react';
+import { Home, Library, History, Settings } from 'lucide-react';
 
 export function App() {
   const [currentView, setCurrentView] = useState<string>('discover');
@@ -205,7 +203,6 @@ export function App() {
     { id: 'discover', label: 'Discover', icon: Home },
     { id: 'library', label: 'Library', icon: Library },
     { id: 'history', label: 'History', icon: History },
-    { id: 'scripts', label: 'Scripts', icon: Code2 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -250,6 +247,7 @@ export function App() {
               relatedVideos={videos.filter(v => v.id !== selectedVideo.id)}
               onSelectVideo={setSelectedVideo}
               accentColor={settings.accentColor}
+              sponsorBlockEnabled={settings.sponsorBlockEnabled}
             />
           ) : (
             <>
@@ -300,25 +298,15 @@ export function App() {
                   />
                 </div>
               )}
-              {currentView === 'scripts' && (
-                <ScriptsView
-                  scripts={userscripts}
-                  onSaveScript={handleSaveUserscript}
-                  onDeleteScript={handleDeleteUserscript}
-                  accentColor={settings.accentColor}
-                />
-              )}
-              {currentView === 'extensions' && (
-                <ExtensionsView
-                  plugins={plugins}
-                  onTogglePlugin={handleTogglePlugin}
-                  accentColor={settings.accentColor}
-                />
-              )}
               {currentView === 'settings' && (
                 <SettingsView
                   settings={settings}
                   onSaveSettings={handleSaveSettings}
+                  userscripts={userscripts}
+                  onSaveScript={handleSaveUserscript}
+                  onDeleteScript={handleDeleteUserscript}
+                  plugins={plugins}
+                  onTogglePlugin={handleTogglePlugin}
                   accentColor={settings.accentColor}
                 />
               )}

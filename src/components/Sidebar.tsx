@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Library, History, Code2, Puzzle, Settings, Terminal, ChevronLeft, ChevronRight, Video } from 'lucide-react';
+import { Home, Library, History, Settings, Terminal, ChevronLeft, ChevronRight, Video } from 'lucide-react';
 
 interface SidebarProps {
   currentView: string;
@@ -20,9 +20,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'discover', label: 'Discover & Search', icon: Home },
     { id: 'library', label: 'Library & Playlists', icon: Library },
     { id: 'history', label: 'Watch History', icon: History },
-    { id: 'scripts', label: 'Userscript Manager', icon: Code2 },
-    { id: 'extensions', label: 'Plugins & Extensions', icon: Puzzle },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'settings', label: 'Settings & Extensions', icon: Settings },
     { id: 'devtools', label: 'Developer Tools', icon: Terminal },
   ];
 
