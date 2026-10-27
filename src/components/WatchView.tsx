@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { YouTubeVideo, SavedVideoMeta } from '../types';
-import { ArrowLeft, Heart, Clock, Tag, Save, ExternalLink, Shield, Play } from 'lucide-react';
+import { ArrowLeft, Heart, Clock, Tag, Save, ExternalLink, Shield, Play, RefreshCw } from 'lucide-react';
 import { fetchSponsorSegments, type SponsorSegment } from '../services/sponsorblock';
 
 interface WatchViewProps {
@@ -35,7 +35,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
   const [savedStatus, setSavedStatus] = useState(false);
   const [sponsorSegments, setSponsorSegments] = useState<SponsorSegment[]>([]);
   const [loadingSponsors, setLoadingSponsors] = useState(true);
-  const [embedFailed, setEmbedFailed] = useState(false);
+  const [playerMode, setPlayerMode] = useState<'piped' | 'nocookie' | 'direct'>('piped');
 
   useEffect(() => {
     let isMounted = true;
@@ -53,7 +53,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
       }
     }
     loadSponsors();
-    setEmbedFailed(false);
+    setPlayerMode('piped');
     return () => {
       isMounted = false;
     };
@@ -163,46 +163,66 @@ export const WatchView: React.FC<WatchViewProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center">
-            {embedFailed ? (
+            {playerMode === 'direct' ? (
               <div className="absolute inset-0 bg-gray-900 flex flex-col items-center justify-center p-6 text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center">
                   <Play className="w-8 h-8 fill-current ml-1" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-base">Watch Directly on YouTube</h3>
+                  <h3 className="font-bold text-white text-base">Watch on YouTube Website</h3>
                   <p className="text-xs text-gray-400 max-w-md mt-1">
-                    Some creators restrict embedded playback or browser network policies block third-party frames. Click below to open and watch seamlessly on YouTube.
+                    Direct video playback opened in a secure tab to prevent network connection resets or iframe restrictions.
                   </p>
                 </div>
-                <a
-                  href={`https://www.youtube.com/watch?v=${video.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-xl text-white text-xs font-semibold shadow-lg flex items-center gap-2 transition-transform hover:scale-105"
-                  style={{ backgroundColor: accentColor }}
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span>Open Video in New Tab</span>
-                </a>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={`https://www.youtube.com/watch?v=${video.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 rounded-xl text-white text-xs font-semibold shadow-lg flex items-center gap-2 transition-transform hover:scale-105"
+                    style={{ backgroundColor: accentColor }}
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Open YouTube</span>
+                  </a>
+                  <button
+                    onClick={() => setPlayerMode('piped')}
+                    className="px-4 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold flex items-center gap-2 transition-colors border border-gray-700"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Try Ad-Free Proxy</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <>
                 <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
+                  src={
+                    playerMode === 'piped'
+                      ? `https://piped.video/embed/${video.id}?autoplay=1`
+                      : `https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`
+                  }
                   title={video.title}
                   className="w-full h-full border-0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
-                  onError={() => setEmbedFailed(true)}
                 />
-                <div className="absolute top-3 right-3 flex items-center gap-2">
+                <div className="absolute top-3 right-3 flex items-center gap-2 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shadow-lg">
+                  <span className="text-[10px] text-gray-300 font-medium">Engine:</span>
                   <button
-                    onClick={() => setEmbedFailed(true)}
-                    className="bg-black/70 hover:bg-black text-white text-[10px] px-2.5 py-1.5 rounded-lg backdrop-blur-sm border border-white/10 transition-colors shadow-lg"
+                    onClick={() => setPlayerMode(playerMode === 'piped' ? 'nocookie' : 'piped')}
+                    className="text-white text-[11px] font-semibold underline hover:text-purple-400 transition-colors"
                   >
-                    Switch to Direct Play
+                    {playerMode === 'piped' ? 'Piped (Ad-Free)' : 'YouTube NoCookie'}
+                  </button>
+                  <span className="text-gray-500">|</span>
+                  <button
+                    onClick={() => setPlayerMode('direct')}
+                    className="text-gray-300 hover:text-white text-[11px] transition-colors"
+                  >
+                    Direct
                   </button>
                 </div>
               </>
