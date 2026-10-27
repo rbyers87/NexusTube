@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between gap-4 sticky top-0 z-30 shadow-md">
+    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 flex items-center justify-between gap-4 sticky top-0 z-30 shadow-md">
       <div className="flex-1 max-w-2xl relative">
         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
           <Search className="w-4 h-4" />
@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Search public YouTube videos, channels, or tags..."
-          className="w-full bg-gray-950 border border-gray-800 rounded-xl pl-10 pr-24 py-2.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+          className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl pl-10 pr-24 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
         />
         <button
           onClick={() => onSearchSubmit(searchQuery)}
@@ -77,8 +77,8 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={onOpenSettings}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
             isMock
-              ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
-              : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+              ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20'
+              : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20'
           }`}
           title={isMock ? 'Using curated demo mode. Click to configure API key.' : 'Connected to YouTube Data API v3'}
         >
@@ -97,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={handleInstallClick}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-medium border border-gray-700 transition-all shadow-sm"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-medium border border-gray-300 dark:border-gray-700 transition-all shadow-sm"
           title="Install NexusTube PWA"
         >
           <Download className="w-3.5 h-3.5" />

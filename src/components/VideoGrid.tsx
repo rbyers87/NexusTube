@@ -40,7 +40,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
     <div className="space-y-6">
       {isMock && (
         <div
-          className="rounded-2xl p-6 relative overflow-hidden text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl border border-gray-800"
+          className="rounded-2xl p-6 relative overflow-hidden text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl border border-gray-200 dark:border-gray-800"
           style={{ background: `linear-gradient(135deg, #1f2028 0%, #111827 100%)` }}
         >
           <div className="space-y-2 max-w-xl">
@@ -65,16 +65,16 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
       )}
 
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gray-200">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
           {isMock ? 'Curated Discover Feed' : 'Search Results'} ({videos.length})
         </h2>
       </div>
 
       {videos.length === 0 ? (
-        <div className="text-center py-20 bg-gray-900/40 border border-gray-800 rounded-2xl">
-          <Film className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-gray-300">No videos found</h3>
-          <p className="text-sm text-gray-500 mt-1">Try searching for a different keyword or topic.</p>
+        <div className="text-center py-20 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm">
+          <Film className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
+          <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200">No videos found</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try searching for a different keyword or topic.</p>
         </div>
       ) : (
         <div className={`grid ${getGridClass(gridColumns)} gap-6`}>

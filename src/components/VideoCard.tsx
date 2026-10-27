@@ -26,9 +26,9 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   return (
     <div
       onClick={() => onSelectVideo(video)}
-      className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden group hover:border-gray-700 transition-all duration-300 hover:shadow-xl cursor-pointer flex flex-col"
+      className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden group hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-300 hover:shadow-xl cursor-pointer flex flex-col"
     >
-      <div className="relative aspect-video bg-gray-950 overflow-hidden">
+      <div className="relative aspect-video bg-gray-100 dark:bg-gray-950 overflow-hidden">
         <img
           src={video.thumbnailUrl}
           alt={video.title}
@@ -52,19 +52,19 @@ export const VideoCard: React.FC<VideoCardProps> = ({
 
       <div className="p-4 flex-1 flex flex-col justify-between">
         <div>
-          <h3 className="font-semibold text-gray-100 text-sm line-clamp-2 group-hover:text-purple-300 transition-colors leading-snug mb-1">
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors leading-snug mb-1">
             {video.title}
           </h3>
-          <p className="text-xs text-gray-400 font-medium">{video.channelTitle}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{video.channelTitle}</p>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between text-xs text-gray-400">
+        <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-800/80 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>{video.viewCount ? `${video.viewCount} views` : 'Public Video'}</span>
           <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={(e) => onToggleWatchLater(video.id, e)}
               className={`p-1.5 rounded-lg transition-colors ${
-                isWatchLater ? 'text-purple-400 bg-purple-500/10' : 'hover:bg-gray-800 text-gray-400 hover:text-gray-200'
+                isWatchLater ? 'text-purple-600 dark:text-purple-400 bg-purple-500/10' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
               title={isWatchLater ? 'In Watch Later' : 'Add to Watch Later'}
             >
@@ -73,7 +73,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
             <button
               onClick={(e) => onToggleFavorite(video.id, e)}
               className={`p-1.5 rounded-lg transition-colors ${
-                isFav ? 'text-rose-500 bg-rose-500/10' : 'hover:bg-gray-800 text-gray-400 hover:text-gray-200'
+                isFav ? 'text-rose-500 bg-rose-500/10' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
               title={isFav ? 'Favorited' : 'Add to Favorites'}
             >

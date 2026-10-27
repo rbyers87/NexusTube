@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { YouTubeVideo, SavedVideoMeta } from '../types';
-import { ArrowLeft, Heart, Clock, Tag, Save, ExternalLink, Shield } from 'lucide-react';
+import { ArrowLeft, Heart, Clock, Tag, Save, ExternalLink, Shield, Play } from 'lucide-react';
 import { fetchSponsorSegments, type SponsorSegment } from '../services/sponsorblock';
 
 interface WatchViewProps {
@@ -33,6 +33,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
   const [savedStatus, setSavedStatus] = useState(false);
   const [sponsorSegments, setSponsorSegments] = useState<SponsorSegment[]>([]);
   const [loadingSponsors, setLoadingSponsors] = useState(true);
+  const [embedFailed, setEmbedFailed] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -45,6 +46,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
       }
     }
     loadSponsors();
+    setEmbedFailed(false);
     return () => {
       isMounted = false;
     };
@@ -112,7 +114,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 text-gray-200 text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm font-medium transition-colors shadow-sm"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Feed</span>
@@ -120,10 +122,10 @@ export const WatchView: React.FC<WatchViewProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={() => onToggleWatchLater(video.id)}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-medium transition-colors shadow-sm ${
               isWatchLater
-                ? 'bg-purple-500/10 border-purple-500/30 text-purple-300'
-                : 'bg-gray-900 border-gray-800 text-gray-300 hover:bg-gray-800'
+                ? 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-300'
+                : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
             }`}
           >
             <Clock className="w-4 h-4" />
@@ -131,10 +133,10 @@ export const WatchView: React.FC<WatchViewProps> = ({
           </button>
           <button
             onClick={handleToggleFavorite}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-medium transition-colors shadow-sm ${
               isFavorite
-                ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-                : 'bg-gray-900 border-gray-800 text-gray-300 hover:bg-gray-800'
+                ? 'bg-rose-500/10 border-rose-500/30 text-rose-500 dark:text-rose-400'
+                : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
             }`}
           >
             <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
@@ -144,7 +146,7 @@ export const WatchView: React.FC<WatchViewProps> = ({
             href={`https://www.youtube.com/watch?v=${video.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 text-gray-300 text-xs font-medium transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium transition-colors shadow-sm"
             title="Open on YouTube website"
           >
             <ExternalLink className="w-4 h-4" />
@@ -155,26 +157,61 @@ export const WatchView: React.FC<WatchViewProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
-            <iframe
-              src={`https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&enablejsapi=1`}
-              title={video.title}
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
+          <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center">
+            {embedFailed ? (
+              <div className="absolute inset-0 bg-gray-900 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                  <Play className="w-8 h-8 fill-current ml-1" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-base">Embedding Restricted by YouTube Creator</h3>
+                  <p className="text-xs text-gray-400 max-w-md mt-1">
+                    This video does not allow playback inside embedded players or requires direct access. You can watch it directly on YouTube.
+                  </p>
+                </div>
+                <a
+                  href={`https://www.youtube.com/watch?v=${video.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 rounded-xl text-white text-xs font-semibold shadow-lg flex items-center gap-2"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Open Video on YouTube</span>
+                </a>
+              </div>
+            ) : (
+              <>
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
+                  title={video.title}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  onError={() => setEmbedFailed(true)}
+                />
+                <div className="absolute top-3 right-3">
+                  <button
+                    onClick={() => setEmbedFailed(true)}
+                    className="bg-black/70 hover:bg-black text-white text-[10px] px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10 transition-colors"
+                  >
+                    Having trouble? Open Direct
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4 shadow-lg">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4 shadow-lg">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <h1 className="text-xl font-bold text-gray-100 leading-snug">{video.title}</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-snug">{video.title}</h1>
               <div className="flex items-center gap-2 shrink-0">
                 <span className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border ${
                   loadingSponsors
-                    ? 'bg-gray-800 text-gray-400 border-gray-700'
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
                     : sponsorSegments.length > 0
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                    : 'bg-gray-800 text-gray-400 border-gray-700'
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700'
                 }`}>
                   <Shield className="w-3.5 h-3.5" />
                   {loadingSponsors ? 'Checking SponsorBlock...' : sponsorSegments.length > 0 ? `SponsorBlock: ${sponsorSegments.length} segments` : 'No sponsors found'}
@@ -183,48 +220,48 @@ export const WatchView: React.FC<WatchViewProps> = ({
             </div>
 
             {sponsorSegments.length > 0 && (
-              <div className="bg-gray-950 border border-gray-800 rounded-xl p-3 flex flex-wrap items-center gap-2 text-xs">
-                <span className="text-gray-400 font-medium">Skipping Segments:</span>
+              <div className="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl p-3 flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-gray-600 dark:text-gray-400 font-medium">Skipping Segments:</span>
                 {sponsorSegments.map((seg, idx) => (
-                  <span key={idx} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">
+                  <span key={idx} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-mono">
                     {seg.category} ({formatTime(seg.segment[0])} - {formatTime(seg.segment[1])})
                   </span>
                 ))}
               </div>
             )}
 
-            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-800 text-sm">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-800 text-sm">
               <div>
-                <h3 className="font-semibold text-gray-200">{video.channelTitle}</h3>
-                <span className="text-xs text-gray-400">Published: {new Date(video.publishedAt).toLocaleDateString()}</span>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200">{video.channelTitle}</h3>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Published: {new Date(video.publishedAt).toLocaleDateString()}</span>
               </div>
-              <div className="text-xs text-gray-400 font-mono">
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                 {video.viewCount ? `${video.viewCount} views` : 'Official Player API'}
               </div>
             </div>
-            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">{video.description}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">{video.description}</p>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4 shadow-lg">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4 shadow-lg">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-gray-200">Personal Notes & Tags</h2>
-              {savedStatus && <span className="text-xs text-emerald-400 font-medium">Saved to IndexedDB!</span>}
+              <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Personal Notes & Tags</h2>
+              {savedStatus && <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Saved to IndexedDB!</span>}
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-gray-400 font-medium flex items-center gap-1.5">
+              <label className="text-xs text-gray-600 dark:text-gray-400 font-medium flex items-center gap-1.5">
                 <Tag className="w-3.5 h-3.5" /> Tags & Categories
               </label>
               <div className="flex flex-wrap items-center gap-2">
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/30"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/30"
                   >
                     <span>{tag}</span>
                     <button
                       onClick={() => handleRemoveTag(tag)}
-                      className="hover:text-rose-400 transition-colors ml-1 font-bold"
+                      className="hover:text-rose-500 dark:hover:text-rose-400 transition-colors ml-1 font-bold"
                     >
                       ×
                     </button>
@@ -236,20 +273,20 @@ export const WatchView: React.FC<WatchViewProps> = ({
                     value={newTagInput}
                     onChange={(e) => setNewTagInput(e.target.value)}
                     placeholder="+ Add tag..."
-                    className="bg-gray-950 border border-gray-800 rounded-xl px-3 py-1 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                    className="bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl px-3 py-1 text-xs text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
                   />
                 </form>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-gray-400 font-medium">Personal Notes / Timestamps</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 font-medium">Personal Notes / Timestamps</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
                 placeholder="Write private notes, key takeaways, or timestamps here..."
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-y"
+                className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-3 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-y"
               />
             </div>
 
@@ -267,24 +304,24 @@ export const WatchView: React.FC<WatchViewProps> = ({
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-base font-bold text-gray-200">Related & Recommended</h2>
+          <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Related & Recommended</h2>
           <div className="space-y-3">
             {relatedVideos.map((rv) => (
               <div
                 key={rv.id}
                 onClick={() => onSelectVideo(rv)}
-                className="flex gap-3 bg-gray-900 border border-gray-800 rounded-xl p-2.5 hover:border-gray-700 cursor-pointer transition-all group"
+                className="flex gap-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-2.5 hover:border-gray-300 dark:hover:border-gray-700 cursor-pointer transition-all group shadow-sm"
               >
                 <img
                   src={rv.thumbnailUrl}
                   alt={rv.title}
-                  className="w-28 aspect-video object-cover rounded-lg shrink-0 bg-gray-950"
+                  className="w-28 aspect-video object-cover rounded-lg shrink-0 bg-gray-100 dark:bg-gray-950"
                 />
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-xs font-semibold text-gray-200 line-clamp-2 group-hover:text-purple-300 transition-colors leading-snug mb-1">
+                  <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors leading-snug mb-1">
                     {rv.title}
                   </h4>
-                  <p className="text-[11px] text-gray-400 truncate">{rv.channelTitle}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{rv.channelTitle}</p>
                 </div>
               </div>
             ))}

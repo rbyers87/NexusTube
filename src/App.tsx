@@ -210,7 +210,7 @@ export function App() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-950 text-gray-100 pb-20 md:pb-0">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 pb-20 md:pb-0 transition-colors">
       <div className="hidden md:flex">
         <Sidebar
           currentView={currentView}
@@ -283,9 +283,9 @@ export function App() {
               )}
               {currentView === 'history' && (
                 <div className="space-y-6">
-                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-lg">
-                    <h1 className="text-xl font-bold text-white">Watch History</h1>
-                    <p className="text-sm text-gray-400 mt-1">Recently played videos stored locally.</p>
+                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-lg">
+                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">Watch History</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Recently played videos stored locally.</p>
                   </div>
                   <VideoGrid
                     videos={videos.slice(0, 4)}
@@ -331,7 +331,7 @@ export function App() {
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav aria-label="Mobile Navigation" className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-800 z-40 px-2 py-2 flex items-center justify-around shadow-2xl">
+      <nav aria-label="Mobile Navigation" className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 z-40 px-2 py-2 flex items-center justify-around shadow-2xl">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
@@ -343,7 +343,7 @@ export function App() {
                 setCurrentView(item.id);
               }}
               className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-colors ${
-                isActive ? 'text-white' : 'text-gray-400 hover:text-gray-200'
+                isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               <div
