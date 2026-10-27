@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { YouTubeVideo, SavedVideoMeta } from '../types';
-import { ArrowLeft, Heart, Clock, Tag, Save, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Heart, Clock, Tag, Save, ExternalLink, Shield } from 'lucide-react';
+import { fetchSponsorSegments, type SponsorSegment } from '../services/sponsorblock';
 
 interface WatchViewProps {
   video: YouTubeVideo;
@@ -30,6 +31,24 @@ export const WatchView: React.FC<WatchViewProps> = ({
   const [newTagInput, setNewTagInput] = useState('');
   const [isFavorite, setIsFavorite] = useState(savedMeta?.isFavorite || false);
   const [savedStatus, setSavedStatus] = useState(false);
+  const [sponsorSegments, setSponsorSegments] = useState<SponsorSegment[]>([]);
+  const [loadingSponsors, setLoadingSponsors] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadSponsors() {
+      setLoadingSponsors(true);
+      const segments = await fetchSponsorSegments(video.id);
+      if (isMounted) {
+        setSponsorSegments(segments);
+        setLoadingSponsors(false);
+      }
+    }
+    loadSponsors();
+    return () => {
+      isMounted = false;
+    };
+  }, [video.id]);
 
   const handleSaveNotes = () => {
     onSaveMeta({
@@ -80,6 +99,12 @@ export const WatchView: React.FC<WatchViewProps> = ({
       tags: updated,
       savedAt: savedMeta?.savedAt || Date.now(),
     });
+  };
+
+  const formatTime = (sec: number) => {
+    const mins = Math.floor(sec / 60);
+    const secs = Math.floor(sec % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   return (
@@ -141,7 +166,33 @@ export const WatchView: React.FC<WatchViewProps> = ({
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4 shadow-lg">
-            <h1 className="text-xl font-bold text-gray-100 leading-snug">{video.title}</h1>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <h1 className="text-xl font-bold text-gray-100 leading-snug">{video.title}</h1>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border ${
+                  loadingSponsors
+                    ? 'bg-gray-800 text-gray-400 border-gray-700'
+                    : sponsorSegments.length > 0
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                    : 'bg-gray-800 text-gray-400 border-gray-700'
+                }`}>
+                  <Shield className="w-3.5 h-3.5" />
+                  {loadingSponsors ? 'Checking SponsorBlock...' : sponsorSegments.length > 0 ? `SponsorBlock: ${sponsorSegments.length} segments` : 'No sponsors found'}
+                </span>
+              </div>
+            </div>
+
+            {sponsorSegments.length > 0 && (
+              <div className="bg-gray-950 border border-gray-800 rounded-xl p-3 flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-gray-400 font-medium">Skipping Segments:</span>
+                {sponsorSegments.map((seg, idx) => (
+                  <span key={idx} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">
+                    {seg.category} ({formatTime(seg.segment[0])} - {formatTime(seg.segment[1])})
+                  </span>
+                ))}
+              </div>
+            )}
+
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-800 text-sm">
               <div>
                 <h3 className="font-semibold text-gray-200">{video.channelTitle}</h3>
